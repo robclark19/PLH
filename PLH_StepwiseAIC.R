@@ -13,6 +13,7 @@ library("emmeans")
 library("nlme")
 library("MASS") #stepAIC()
 library("glmmTMB")
+library("MuMIn") # model.avg(). Rob has no experience with this approach so proceed with caution.
 
 # Import raw data
 
@@ -37,8 +38,8 @@ plh_dat <- plh_dat %>%
 
 # Fully specified model using all independent variables seen in original script
 
-mod1_full <- glmmTMB(n_hoppers ~ year + n_week + lat + p_alfalfa + p_potato + p_beans + gdd_total,
-                              family=nbinom2(), # Tweedie would be better but that model doesn't converge
+mod1_full <- glmmTMB(n_hoppers ~ year + n_week + lat + p_alfalfa + p_potato + p_beans + tmean_summer,
+                              family=nbinom2, # Tweedie would be better but that model doesn't converge
                               data=plh_dat) 
 
 mod1_sa <- stepAIC(mod1_full, direction = "both")
@@ -59,7 +60,7 @@ summary(mod1_trim) # more or less looks like only beans matter
 # Model 2
 # Effects on date of first capture
 
-mod2_full <- glmmTMB(first ~ year + n_week + lat + p_alfalfa + p_potato + p_beans + gdd_total,
+mod2_full <- glmmTMB(first ~ year + n_week + lat + p_alfalfa + p_potato + p_beans + tmean_summer,
                      family=gaussian(), #I assume these are Julian date values which are normally distributed
                      data=plh_dat) 
 
@@ -79,7 +80,7 @@ summary(mod2_trim)
 # Model 3
 # Effects on date of last capture
 
-mod3_full <- glmmTMB(last ~ year + n_week + lat + p_alfalfa + p_potato + p_beans + gdd_total,
+mod3_full <- glmmTMB(last ~ year + n_week + lat + p_alfalfa + p_potato + p_beans + tmean_summer,
                      family=gaussian(),
                      data=plh_dat) 
 
@@ -96,7 +97,7 @@ summary(mod3_trim)
 # Model 4
 # Effects on the range between first and last
 
-mod4_full <- glmmTMB(range ~ year + n_week + lat + p_alfalfa + p_potato + p_beans + gdd_total,
+mod4_full <- glmmTMB(range ~ year + n_week + lat + p_alfalfa + p_potato + p_beans + tmean_summer,
                      family=gaussian(),
                      data=plh_dat) 
 
