@@ -140,11 +140,18 @@ summary(mod4_trim)
 
 mod4_pred = ggpredict(mod4_trim, ci.lvl=NA)
 
+mod4_plot_year = mod4_pred$year %>%
+  ggplot(aes(x=x,y=predicted)) +
+  geom_bar(stat="identity") + # pull points from raw data
+  labs(x = "Year", y = "Date Range of Planthopper Observations")
+
+mod4_plot_year
+
 mod4_plot_lat = mod4_pred$lat %>%
   ggplot(aes(x=x,y=predicted)) +
   geom_point(data=plh_dat, aes(x=lat, y=range), size=0.5, alpha=0.5) + # pull points from raw data
   geom_line() +
-  # scale_y_continuous(limits=c(40,160)) + # trim lower ones from viz
+  # scale_y_continuous(limits=c(40,160)) + # trim lower ones from viz if needed
   labs(x = "Latitude", y = "Date Range of Planthopper Observations")
 
 mod4_plot_lat
@@ -153,16 +160,15 @@ mod4_plot_tater = mod4_pred$p_potato %>%
   ggplot(aes(x=x,y=predicted)) +
   geom_point(data=plh_dat, aes(x=p_potato, y=range), size=0.5, alpha=0.5) + # pull points from raw data
   geom_line() +
-  # scale_y_continuous(limits=c(40,160)) + # trim lower ones from viz
   labs(x = "Proportional coverage of nearby potato", y = "Date Range of Planthopper Observations")
 
 mod4_plot_tater
 
 # arrange and output as png for pubs
-fig_1ab <- ggarrange(mod4_plot_lat, mod4_plot_tater, labels = c("a", "b"), nrow = 1,
+fig_1ab <- ggarrange(mod4_plot_year, mod4_plot_lat, mod4_plot_tater, labels = c("a", "b", "c"), nrow = 1,
                      common.legend = FALSE, widths = c(1, 1))
 
-ggsave(filename = "./figures/fig_1ab.png", plot = fig_1ab , device = "png",
+ggsave(filename = "./figures/fig_1abc.png", plot = fig_1ab , device = "png",
        width = 10, height = 4, units = "in", scale = 0.9)
 
 
