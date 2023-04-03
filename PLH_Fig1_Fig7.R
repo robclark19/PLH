@@ -22,8 +22,6 @@ season_dat$orr_il[season_dat$orr_il == "n.s."] <- NA
 season_dat$orr_il <- as.numeric(season_dat$orr_il)
 
 # Get Julian days
-
-
 # Convert three-letter month codes to numeric months
 season_dat$month <- match(toupper(season_dat$month), toupper(month.abb))
 
@@ -34,16 +32,15 @@ season_dat$date <- as.Date(paste(season_dat$year, season_dat$month, season_dat$d
 season_dat$julian_day <- yday(season_dat$date)
 
 
-# Make a kernal density plot for freeport_il
+# Reshape the data frame into long format
+season_long <- gather(season_dat, site, count, freeport_il:hancock_wi, factor_key=TRUE)
+str(season_long)
 
-# Define a function that returns the kernel density estimate of the orr_il values
-density_func <- approxfun(density(season_dat$orr_il))
 
-# Plot the kernel density curve with orr_il values on the y-axis
-ggplot(data_df, aes(x = orr_il, y = ..x..)) + 
-  stat_function(fun = density_func, aes(colour = "Density")) +
-  xlim(min(data_df$orr_il), max(data_df$orr_il)) + 
-  ylim(min(data_df$julian_day_year), max(data_df$julian_day_year)) + 
-  xlab("Orr, IL") + 
-  ylab("Julian day year") +
-  theme_classic()
+# Create a ggplot with 7 facets
+ggplot(season_long, aes(x = julian_day, y = count, group = site)) +
+  geom_line() +
+  facet_wrap(~site, scales = "free_y") +
+  xlab("Column") +
+  ylab("Value") +
+  theme_bw()
