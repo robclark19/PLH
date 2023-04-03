@@ -34,13 +34,21 @@ season_dat$julian_day <- yday(season_dat$date)
 
 # Reshape the data frame into long format
 season_long <- gather(season_dat, site, count, freeport_il:hancock_wi, factor_key=TRUE)
-str(season_long)
+
+# Create sequential julian days
+season_long$sequential_jd <- season_long$julian_day + ((season_long$year - min(season_long$year)) * 365) + as.numeric(format(as.Date(paste0(season_long$year, "-01-01")), "%j")) - 1
+# not necessary if you fragment the axis by year
+
 
 
 # Create a ggplot with 7 facets
-ggplot(season_long, aes(x = julian_day, y = count, group = site)) +
+# still borked. needs partitions along the x axis by year
+ggplot(season_long, aes(x = sequential_jd , y = count, group = site)) +
   geom_line() +
   facet_wrap(~site, scales = "free_y") +
+  scale_y_continuous(
+    breaks = season_long$year,
+    labels = season_long$year) +
   xlab("Column") +
   ylab("Value") +
   theme_bw()
