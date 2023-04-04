@@ -9,11 +9,13 @@ library("janitor")
 library("lubridate")
 library("ggplot2")
 library("showtext")
+library("ggpubr")
 
 font_add_google(name="Raleway", family="Raleway")
 showtext_opts(dpi = 300)
 showtext_auto(enable = TRUE)
 
+# Figure 1 ####
 # Figure 1 is a line plot of the 7 of the seasonal patterns for each site
 
 season_dat <- read.csv("Fig 1 Data2023.csv") %>% clean_names()
@@ -82,3 +84,40 @@ ggplot(season_long, aes(x = date, y = count, group = site)) +
   )
 ggsave(filename="timeseries.png",path="./figures/",
        width=12,height=30,units="cm",dpi=300,device=ragg::agg_png())
+
+
+
+
+
+
+
+# Figure 7 ####
+# original with some tweaks to code sent from mike
+
+dat = read.table('PLH_pheno_weather_land.txt',sep='\t',as.is=T,check.names=F,header=T)
+
+# maybe make a density plot for first detection in each year and overlay
+# freqpoly works well as a polygon drawn over a histogram. Bins are 48 (12 months x 4 years)
+
+fig_7a <- ggplot(dat, aes(x = yday(First.date), group=Year)) +
+  geom_freqpoly(binwidth=48) +
+  facet_wrap(~Year) +
+  xlab("Date of first detection") +
+  ylab("Number of sites with detections") +
+  theme_bw()
+fig_7a 
+
+fig_7b <- ggplot(dat, aes(x = yday(Last.date), group=Year)) +
+  geom_freqpoly(binwidth=48) +
+  facet_wrap(~Year) +
+  xlab("Date of last detection") +
+  ylab("Number of sites with detections") +
+  theme_bw()
+fig_7b
+
+# merge 7a and 7b
+Fig_7ab <- ggarrange(fig_7a, fig_7b, labels = c("", ""), nrow = 2,
+                     common.legend = FALSE, widths = c(1.75, 0.5))
+
+ggsave(filename = "./figures/Fig_7ab.png", plot = Fig_7ab , device = "png",
+       width = 4, height = 8, units = "in", scale = 0.9)
