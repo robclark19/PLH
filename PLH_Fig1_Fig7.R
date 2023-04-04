@@ -8,7 +8,11 @@ library("tidyverse")
 library("janitor")
 library("lubridate")
 library("ggplot2")
+library("showtext")
 
+font_add_google(name="Raleway", family="Raleway")
+showtext_opts(dpi = 300)
+showtext_auto(enable = TRUE)
 
 # Figure 1 is a line plot of the 7 of the seasonal patterns for each site
 
@@ -40,15 +44,41 @@ season_long$sequential_jd <- season_long$julian_day + ((season_long$year - min(s
 # not necessary if you fragment the axis by year
 
 
+panel_labs = c("Freeport, IL",
+               "Orr, IL",
+               "Urbana-Champaign, IL",
+               "Columbia City, IN",
+               "Lafayette, IN",
+               "Kanawha, IA",
+               "Hancock, WI")
+names(panel_labs) = c("freeport_il",
+                      "orr_il",
+                      "urbana_champaign_ii_il",
+                      "columbia_city_in",
+                      "lafayette_in",
+                      "kanawha_ia",
+                      "hancock_wi")
 
 # Create a ggplot with 7 facets
 # still borked. needs partitions along the x axis by year
-ggplot(season_long, aes(x = sequential_jd , y = count, group = site)) +
-  geom_line() +
-  facet_wrap(~site, scales = "free_y") +
-  scale_y_continuous(
-    breaks = season_long$year,
-    labels = season_long$year) +
-  xlab("Column") +
-  ylab("Value") +
-  theme_bw()
+base_pt = 12
+ggplot(season_long, aes(x = date, y = count, group = site)) +
+  geom_line(size=0.5) +
+  facet_wrap(~site, scales = "free_y", labeller=labeller(site=panel_labs),ncol=1) +
+  scale_x_date(date_breaks = "1 year", date_minor_breaks = "1 month", date_labels = "%Y") +
+  xlab("Year") +
+  ylab("Count") +
+  theme_bw() + theme(
+    text = element_text(family="Raleway"),
+    panel.grid.major.x = element_line(linewidth=1.3,colour="lightgrey"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.ticks.x = element_line(linewidth=1.3, colour="lightgrey"),
+    axis.text.x = element_text(size=0.8*base_pt, color="black"),
+    axis.title = element_text(size=base_pt),
+    strip.text = element_text(size=0.8*base_pt, hjust=0.02, margin=margin(b=0,t=0)),
+    strip.background = element_blank(),
+    panel.border = element_rect(color="black",linewidth=0.8)
+  )
+ggsave(filename="timeseries.png",path="./figures/",
+       width=12,height=30,units="cm",dpi=300,device=ragg::agg_png())
