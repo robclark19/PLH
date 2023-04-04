@@ -99,9 +99,14 @@ dat = read.table('PLH_pheno_weather_land.txt',sep='\t',as.is=T,check.names=F,hea
 # maybe make a density plot for first detection in each year and overlay
 # freqpoly works well as a polygon drawn over a histogram. Bins are 48 (12 months x 4 years)
 
+# Calculate the mean of yday(First.date) for each group
+mean_fday <- aggregate(yday(First.date) ~ Year, data = dat, mean)
+mean_lday <- aggregate(yday(Last.date) ~ Year, data = dat, mean)
+
 fig_7a <- ggplot(dat, aes(x = yday(First.date), group=Year)) +
   geom_freqpoly(binwidth=48) +
-  facet_wrap(~Year) +
+  geom_vline(data = mean_fday, aes(xintercept = mean_fday$`yday(First.date)`), color = "red", linetype = "dashed", size = 0.5) +
+  facet_wrap(~Year, nrow=1) +
   xlab("Date of first detection") +
   ylab("Number of sites with detections") +
   theme_bw()
@@ -109,7 +114,8 @@ fig_7a
 
 fig_7b <- ggplot(dat, aes(x = yday(Last.date), group=Year)) +
   geom_freqpoly(binwidth=48) +
-  facet_wrap(~Year) +
+  geom_vline(data = mean_lday, aes(xintercept = mean_lday$`yday(Last.date)`), color = "red", linetype = "dashed", size = 0.5) +
+  facet_wrap(~Year,nrow=1) +
   xlab("Date of last detection") +
   ylab("Number of sites with detections") +
   theme_bw()
@@ -120,4 +126,4 @@ Fig_7ab <- ggarrange(fig_7a, fig_7b, labels = c("", ""), nrow = 2,
                      common.legend = FALSE, widths = c(1.75, 0.5))
 
 ggsave(filename = "./figures/Fig_7ab.png", plot = Fig_7ab , device = "png",
-       width = 4, height = 8, units = "in", scale = 0.9)
+       width = 6, height = 5, units = "in", scale = 0.9)
